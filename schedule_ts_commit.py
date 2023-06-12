@@ -165,7 +165,9 @@ def commit_ts():
     commit_result = []
     for excel in excel_list:
         ts = ExcelObject(excel)
-        records = ts.filter_valid_list(ts.get_content(), ['content', 'replyContent', 'OperateName'])
+        records = ts.filter_valid_list(ts.get_content(),
+                                       ['PostUserName', 'RecordTime', 'ProjectName', 'ProductName', 'content',
+                                        'OperateName'])
         # 登录账号，创建研发系统接口对象
         dm = DevelopmentManager(ts.get_account()['account'], ts.get_account()['password'])
         # 将关键字段的id加入data
@@ -196,6 +198,8 @@ def commit_ts():
                 record['createTime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             else:
                 record['createTime'] = ts.float_to_datetime(record['createTime'])
+            if record['finishHour'] == '':
+                record['finishHour'] = 0
             res = dm.request_post("/api/Records/InsertRecord", record)
             commit_result.append(res)
     return commit_result
@@ -232,10 +236,10 @@ if __name__ == "__main__":
     # print(dm.request_post("/api/Records/InsertRecord", param1))
 
     """excel测试"""
-    # ec = ExcelObject(r"技术支持每日记录.xlsx")
+    ec = ExcelObject(r"./技术支持张烨平.xlsx")
     # print(ec.field_to_id('张烨平', dm.get_record_users()))
     # print(ec.get_account())
-    # print(ec.filter_valid_list(ec.get_content(), ['content', 'replyContent']))
+    print(ec.get_content())
     #
     # print(find_excel(r'./'))
 
@@ -245,4 +249,4 @@ if __name__ == "__main__":
     """备份文件测试"""
     # backup_excel_after_commit()
     # print(find_excel())
-    technical_support_record()
+    # technical_support_record()

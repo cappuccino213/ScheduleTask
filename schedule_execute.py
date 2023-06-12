@@ -6,8 +6,8 @@
 """
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from schedule_rdm import technical_support_record
-from schedule_rdm import datetime
+from schedule_ts_commit import technical_support_record
+from schedule_ts_commit import datetime
 from schedule_ts_notice import job_ts_notice
 from schedule_ts_notice import get_month_range
 
