@@ -10,7 +10,7 @@ import shutil
 
 import requests
 import xlrd as xlrd
-
+"""用于同步excel中记录的技术支持到rdm系统"""
 
 class DevelopmentManager:
     def __init__(self, account, password):
@@ -220,14 +220,15 @@ def backup_excel_after_commit():
 
 # 执行函数
 def technical_support_record():
+    print(f"{6*'='}技术支持记录同步{6*'='}")
     print(f"提交记录，结果：\n{commit_ts()}")
     print(f"记录表备份成功，备份结果：\n{backup_excel_after_commit()}")
 
 
 if __name__ == "__main__":
     """dm测试"""
-    # dm = DevelopmentManager('zyp', 'c25e4bd763ef8450d506ed9288557cc0')
-    # print(dm.login())
+    dm = DevelopmentManager('zyp', 'c25e4bd763ef8450d506ed9288557cc0')
+    print(dm.login())
     # print(dm.get_record_users())
     # param1 = dict(postUserID=2184, RecordTime='2023-05-31 16:00:01.650', createTime='2023-05-31 16:00:01.650',
     #               content='测试问题2',
@@ -236,10 +237,10 @@ if __name__ == "__main__":
     # print(dm.request_post("/api/Records/InsertRecord", param1))
 
     """excel测试"""
-    ec = ExcelObject(r"./技术支持张烨平.xlsx")
+    # ec = ExcelObject(r"./技术支持张烨平.xlsx")
     # print(ec.field_to_id('张烨平', dm.get_record_users()))
     # print(ec.get_account())
-    print(ec.get_content())
+    # print(ec.get_content())
     #
     # print(find_excel(r'./'))
 
