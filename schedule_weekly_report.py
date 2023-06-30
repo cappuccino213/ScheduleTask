@@ -10,6 +10,8 @@ from datetime import datetime, date, timedelta
 
 from database_model import *
 
+from utility import Toolkit
+
 """用于定时获取禅道的工作任务，同步到rdm的周报模块中"""
 
 
@@ -40,8 +42,7 @@ class WeeklyReport:
     # 获取本周完成的测试单列表
     def fetch_this_week_test_task(self, user):
         payload = dict(begin=WeeklyReport.this_monday_and_sunday()[0], end=WeeklyReport.this_monday_and_sunday()[1],
-                       owner=user,
-                       status='done')
+                       owner=user)
         task_list = self.fetch_post("/ewordci/testtask/list", payload)
         if task_list.json()['data']:
             return task_list.json()['data']
@@ -130,19 +131,25 @@ def sync_weekly_task():
                         # 增加项目总结记录后重新获取ProjectSummaryID
                         wps = WeeklyProjectSummary.query_wps(wps_dict)
 
+                    # 获取测试报告
+                    relate_report = WeeklyReport().fetch_test_report(task['id'])
+                    relate_report_id = relate_report['id'] if relate_report else ''
+
                     tt_dict = {
                         'TaskType': '1',  # 周任务表,TaskType：1-功能测试、2-性能测试、3-接口测试，ZTID：禅道测试单id
                         'ZTID': task['id'],
                         'WeeklyID': weekly_info['data']['weeklyData']['weeklyID'],
                         'Name': task['name'],
                         'ProjectSummaryID': wps.ID,
-                        'TaskDescrible': task['desc'],
+                        'TaskDescrible': Toolkit.parse_html(task['desc']),
                         'ActualStartDate': task['begin'],
                         'ActualDeadLine': task['end'],
-                        'TaskStatus': '4',
+                        # 'TaskStatus': '4',
+                        'TaskStatus': '2' if task['status'] == 'doing' else '4' if task['status'] == 'done' else '',
                         'DutyUserID': login_data['userID'],
                         'RelateTestBill': str(task['id']),
-                        'RelateReport': str(WeeklyReport().fetch_test_report(task['id'])['id']),
+                        # 'RelateReport': str(WeeklyReport().fetch_test_report(task['id'])['id']),
+                        'RelateReport': relate_report_id,
                         'AddUserID': login_data['userID']
                     }
                     wt = WeeklyTask.query_wt(tt_dict)
