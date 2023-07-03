@@ -7,7 +7,7 @@
 import requests
 import datetime
 
-from database_model import ProjectModel, UserModel, add_column, update_column
+from database_model import ProjectModel, UserModel, add_column, update_column, query_by_primary_key, ProductModel
 
 """研发管理系统基础数据相关"""
 
@@ -36,7 +36,7 @@ class ProjectManage:
                 if_exist_project = ProjectModel.query_project(dict(ZTID=project['id']))
                 project_dict = {'ProjectName': project['name'],
                                 'LeaderID': UserModel.query_user_info(dict(ZTAccount=project['Leader'])).ID,
-                                'ProductID': project['product'],
+                                'ProductID': ProductModel.query_product(dict(ZTID=project['product'])).ID,
                                 'State': 1 if project['status'] in ('wait', 'doing') else 2,
                                 'ZTID': project['id'],
                                 'CreateDate': project['createDate'],
@@ -49,7 +49,8 @@ class ProjectManage:
                     print(f"增加项目记录成功，详情{ProjectModel(project_dict).to_dict()}")
                 # 存在就更新
                 else:
-                    update_column(if_exist_project.to_dict(), ProjectModel)
+                    project_dict['ID'] = if_exist_project.ID
+                    update_column(project_dict, ProjectModel)
 
 
 if __name__ == "__main__":

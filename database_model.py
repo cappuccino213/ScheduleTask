@@ -143,7 +143,6 @@ class ProjectModel(Base):
                 result = result.filter(cls.ZTID == condition.get('ZTID'))
             if condition.get('ProjectName'):
                 result = result.filter(cls.ProjectName == condition.get('ProjectName'))
-            # return result.all()
             return result.first()
         except Exception as e:
             print(str(e))
@@ -153,6 +152,49 @@ class ProjectModel(Base):
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
+
+# 产品
+class ProductModel(Base):
+    __tablename__ = 'T_Product'
+    ID = Column(Integer, primary_key=True, autoincrement=True)
+    Name = Column(String)
+    Describle = Column(String)
+    State = Column(Integer)
+    ZTID = Column(Integer)
+    CreateDate = Column(DateTime)
+    CreateUser = Column(Integer)
+    UpdateDate = Column(DateTime)
+    UpdateUser = Column(Integer)
+
+    def __init__(self, fields: dict):
+        self.ID = fields.get('ID')
+        self.Name = fields.get('Name')
+        self.Describle = fields.get('Describle')
+        self.LeaderID = fields.get('LeaderID')
+        self.ProductID = fields.get('ProductID')
+        self.State = fields.get('State')
+        self.ZTID = fields.get('ZTID')
+        self.CreateDate = fields.get('CreateDate')
+        self.CreateUser = fields.get('CreateUser')
+        self.UpdateDate = fields.get('UpdateDate')
+        self.UpdateUser = fields.get('UpdateUser')
+
+    @classmethod
+    def query_product(cls, condition: dict):
+        try:
+            result = session.query(cls)
+            if condition.get('ZTID'):
+                result = result.filter(cls.ZTID == condition.get('ZTID'))
+            if condition.get('Name'):
+                result = result.filter(cls.Name == condition.get('Name'))
+            return result.first()
+        except Exception as e:
+            print(str(e))
+        finally:
+            session.close()
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 # 任务
 class WeeklyTask(Base):
@@ -301,4 +343,5 @@ if __name__ == "__main__":
     # update_column(pd, Project)
 
     # print(UserModel.query_user_info(dict(ZTAccount='wjj')).to_dict())
-    print(query_by_primary_key(8245, ProjectModel).to_dict())
+    # print(query_by_primary_key(8245, ProjectModel).to_dict())
+    print(ProjectModel.query_project(dict(ZTID=124)).to_dict())
