@@ -124,7 +124,7 @@ def sync_weekly_task():
                     print(f"2-1获得用户{user['account']}的测试单任务：{task}")
                     """提交数据"""
                     # 项目总结表提交
-                    wps_dict['ProjectID'] = Project.query_project(dict(ZTID=task['project'])).ID  # 项目id需要用rdm上的
+                    wps_dict['ProjectID'] = ProjectModel.query_project(dict(ZTID=task['project'])).ID  # 项目id需要用rdm上的
                     wps = WeeklyProjectSummary.query_wps(wps_dict)
                     if not wps:  # 若不存在周报id和项目id相同的项目总结，则添加
                         add_column(WeeklyProjectSummary(wps_dict))
@@ -170,7 +170,7 @@ def sync_weekly_task():
                     # 获取项目ID
                     project_zt_id = wrt.fetch_project_story(dict(product=demand['product'], story=demand['id']))[
                         'project']
-                    wps_dict['ProjectID'] = Project.query_project(dict(ZTID=project_zt_id)).ID
+                    wps_dict['ProjectID'] = ProjectModel.query_project(dict(ZTID=project_zt_id)).ID
                     wps = WeeklyProjectSummary.query_wps(wps_dict)
                     if not wps:
                         add_column(WeeklyProjectSummary(wps_dict))

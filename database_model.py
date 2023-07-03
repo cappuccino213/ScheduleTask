@@ -57,6 +57,7 @@ def update_column(fields: dict, model: Base):
                     session.query(model).filter(model.ID == fields['ID']).update({k: v})
             session.commit()  # 提交修改
             session.flush()
+            print(f"更新记录成功，详情{fields}")
             return update_column
         except Exception as e:
             print("update_column异常：" + str(e))
@@ -105,7 +106,7 @@ class WeeklyProjectSummary(Base):
 
 
 # 项目
-class Project(Base):
+class ProjectModel(Base):
     __tablename__ = 'T_Project'
     ID = Column(Integer, primary_key=True, autoincrement=True)
     ProjectName = Column(String)
@@ -129,7 +130,6 @@ class Project(Base):
         self.State = fields.get('State')
         self.ZTID = fields.get('ZTID')
         self.CreateDate = fields.get('CreateDate')
-        self.CreateUser = fields.get('CreateUser')
         self.CreateUser = fields.get('CreateUser')
         self.UpdateDate = fields.get('UpdateDate')
         self.UpdateUser = fields.get('UpdateUser')
@@ -243,24 +243,62 @@ class WeeklyReportModel(Base):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
 
+class UserModel(Base):
+    __tablename__ = 'T_User'
+    ID = Column(Integer, primary_key=True, autoincrement=True)
+    Name = Column(String)
+    RoleID = Column(Integer)
+    DepartmentID = Column(Integer)
+    Account = Column(String)
+    Password = Column(String)
+    State = Column(Integer)
+    ZTUserID = Column(Integer)
+    ZTAccount = Column(String)
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    # 查询用户信息
+    @classmethod
+    def query_user_info(cls, condition: dict):
+        try:
+            result = session.query(cls)
+            if condition.get('ID'):
+                result = result.filter(cls.ID == condition.get('ID'))
+            if condition.get('Account'):
+                result = result.filter(cls.Account == condition.get('Account'))
+            if condition.get('ZTAccount'):
+                result = result.filter(cls.ZTAccount == condition.get('ZTAccount'))
+            if condition.get('ZTUserID'):
+                result = result.filter(cls.ZTUserID == condition.get('ZTUserID'))
+            return result.first()
+        except Exception as e:
+            print("query_user_info异常：" + str(e))
+        finally:
+            session.close()
+
+
 if __name__ == "__main__":
     # wps = WeeklyProjectSummary()
     # print(query_by_primary_key(21338, WeeklyProjectSummary))
 
-    pd = {
-        'ID': 59,
-        'ProjectName': '测试项目',
-        'DepartmentID': 0,
-        'LeaderID': 114,
-        'ProductID': 1030,
-        'State': 1,
-        'ZTID': 1,
-        # 'CreateDate': datetime.datetime.now(),
-        'CreateUser': 114,
-        # 'UpdateDate': datetime.datetime.now(),
-        'UpdateUser': 114,
-        'Type': 0
-    }
+    # pd = {
+    #     'ID': 59,
+    #     'ProjectName': '测试项目',
+    #     'DepartmentID': 0,
+    #     'LeaderID': 114,
+    #     'ProductID': 1030,
+    #     'State': 1,
+    #     'ZTID': 1,
+    #     # 'CreateDate': datetime.datetime.now(),
+    #     'CreateUser': 114,
+    #     # 'UpdateDate': datetime.datetime.now(),
+    #     'UpdateUser': 114,
+    #     'Type': 0
+    # }
+    #
+    # pj = Project(pd)
+    # update_column(pd, Project)
 
-    pj = Project(pd)
-    update_column(pd, Project)
+    # print(UserModel.query_user_info(dict(ZTAccount='wjj')).to_dict())
+    print(query_by_primary_key(8245, ProjectModel).to_dict())

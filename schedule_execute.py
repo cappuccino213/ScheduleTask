@@ -12,6 +12,8 @@ from schedule_tss_notice import TechnicalSupportStatisticsNotice
 
 from schedule_weekly_report import sync_weekly_task
 
+from schedule_rdm_basedata import ProjectManage
+
 
 def main():
     my_schedule = BlockingScheduler()
@@ -31,6 +33,10 @@ def main():
     """3.测试周报任务同步，每周一~周六，每十分钟执行一次"""
     my_schedule.add_job(sync_weekly_task, 'cron', day_of_week='mon-sat', minute='*/10')
 
+    """4.项目信息同步，每周一~周五，每十分钟执行一次"""
+    my_schedule.add_job(ProjectManage().async_project_data, 'cron', day_of_week='mon-fri', minute='*/10')
+
+    # 开始执行
     my_schedule.start()
 
 
