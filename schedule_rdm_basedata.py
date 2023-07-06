@@ -5,9 +5,10 @@
 @Contact : yeahcheung213@163.com
 """
 import requests
-import datetime
+# import datetime
 
-from database_model import ProjectModel, UserModel, add_column, update_column, query_by_primary_key, ProductModel
+from utility import *
+from database_model import ProjectModel, UserModel, add_column, update_column, ProductModel
 
 """研发管理系统基础数据相关"""
 
@@ -27,7 +28,7 @@ class ProjectManage:
 
     # 同步项目数据
     def async_project_data(self):
-        print(f"{6 * '='}项目信息同步{6 * '='}")
+        Toolkit.print_thread_info(f"{6 * '='}项目信息同步{6 * '='}")
         # 获取项目列表
         project_list = self.fetch_post()['data']
         if project_list:
@@ -56,3 +57,9 @@ class ProjectManage:
 if __name__ == "__main__":
     # ProjectManage().fetch_post()
     ProjectManage().async_project_data()
+    # tag = ProjectModel.query_project(dict(ZTID=132))
+    # if not tag:
+    #     print("增加")
+    # else:
+    #     print("更新")
+

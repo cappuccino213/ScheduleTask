@@ -104,7 +104,7 @@ class WeeklyReport:
 # 同步测试周报任务
 def sync_weekly_task():
     # 获取执行任务用户数据
-    print(f"{6 * '='}测试周报任务同步{6 * '='}")
+    Toolkit.print_thread_info(f"{6 * '='}测试周报任务同步{6 * '='}")
     wrt = WeeklyReport()
     task_users = wrt.fetch_users()
     print(f"1获取到用户数:{len(task_users)}")

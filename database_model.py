@@ -5,6 +5,9 @@
 @Contact : yeahcheung213@163.com
 """
 from urllib.parse import quote_plus
+
+import pymssql
+import sqlalchemy.exc
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, SmallInteger
 
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -14,9 +17,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 Base = declarative_base()
 
-engine = create_engine(f"mssql+pymssql://sa:{quote_plus('p@ssw0rd')}@192.168.1.45:1433/eWordRDM_dev",
+engine = create_engine(f"mssql+pymssql://sa:{quote_plus('p@ssw0rd')}@192.168.1.45:1433/eWordRDM_dev?charset=utf8",
                        # engine = create_engine(f"mssql+pymssql://sa:{quote_plus('p@ssw0rd')}@192.168.1.45:1433/eWordRDM_Imp",
-                       pool_recycle=3600, echo=False)
+                       pool_recycle=600, echo=False)
 session = sessionmaker(autocommit=False, autoflush=False, bind=engine)()
 
 
@@ -24,26 +27,29 @@ session = sessionmaker(autocommit=False, autoflush=False, bind=engine)()
 def query_by_primary_key(_id: int, model: Base):
     try:
         # 根据主键id查询
-        return session.query(model).get(_id)
+        result = session.query(model).get(_id)
+        session.close()
+        return result
+    except sqlalchemy.exc.OperationalError as e:
+        print(f"OperationalError,{str(e)}")
     except Exception as e:
         print(str(e))
-    finally:
-        session.close()
 
 
 # 添加一行
 def add_column(model: Base):
     try:
         session.add(model)
-        session.commit()
+        session.commit()  # 事物提交数据库
         session.refresh(model)  # 为了读取自增字段(如果有的话)到对象
         session.expunge(model)
-    except Exception as e:
-        print(str(e))
-        session.rollback()
-        session.flush()
-    finally:
         session.close()
+    except sqlalchemy.exc.OperationalError as e:
+        print(f"add_column异常：{str(e)}")
+        session.rollback()  # session回归
+        session.flush()  # 预提交，提交到数据库文件，还未写入到数据库
+    # finally:
+    #     session.close()
 
 
 # 修改表数据
@@ -57,14 +63,15 @@ def update_column(fields: dict, model: Base):
                     session.query(model).filter(model.ID == fields['ID']).update({k: v})
             session.commit()  # 提交修改
             session.flush()
+            session.close()
             print(f"更新记录成功，详情{fields}")
             return update_column
-        except Exception as e:
+        except sqlalchemy.exc.OperationalError as e:
             print("update_column异常：" + str(e))
             session.rollback()
             session.flush()
-        finally:
-            session.close()
+        # finally:
+        #     session.close()
 
 
 # 定义数据表模型
@@ -96,10 +103,11 @@ class WeeklyProjectSummary(Base):
                 result = result.filter(cls.ProjectID == condition.get('ProjectID'))
             # return result.all()
             return result.first()
+        except sqlalchemy.exc.OperationalError as e:
+            print(f"OperationalError,{str(e)}")
         except Exception as e:
             print("query_wps异常：" + str(e))
-        finally:
-            session.close()
+        
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -144,10 +152,11 @@ class ProjectModel(Base):
             if condition.get('ProjectName'):
                 result = result.filter(cls.ProjectName == condition.get('ProjectName'))
             return result.first()
+        except sqlalchemy.exc.OperationalError as e:
+            print(f"OperationalError,{str(e)}")
         except Exception as e:
             print(str(e))
-        finally:
-            session.close()
+        
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -188,13 +197,15 @@ class ProductModel(Base):
             if condition.get('Name'):
                 result = result.filter(cls.Name == condition.get('Name'))
             return result.first()
+        except sqlalchemy.exc.OperationalError as e:
+            print(f"OperationalError,{str(e)}")
         except Exception as e:
             print(str(e))
-        finally:
-            session.close()
+        
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
 
 # 任务
 class WeeklyTask(Base):
@@ -247,10 +258,11 @@ class WeeklyTask(Base):
             if condition.get('ZTID'):
                 result = result.filter(cls.ZTID == condition.get('ZTID'))
             return result.first()
+        except sqlalchemy.exc.OperationalError as e:
+            print(f"OperationalError,{str(e)}")
         except Exception as e:
             print("query_wt异常：" + str(e))
-        finally:
-            session.close()
+        
 
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
@@ -314,10 +326,11 @@ class UserModel(Base):
             if condition.get('ZTUserID'):
                 result = result.filter(cls.ZTUserID == condition.get('ZTUserID'))
             return result.first()
+        except sqlalchemy.exc.OperationalError as e:
+            print(f"OperationalError,{str(e)}")
         except Exception as e:
             print("query_user_info异常：" + str(e))
-        finally:
-            session.close()
+        
 
 
 if __name__ == "__main__":
@@ -343,5 +356,5 @@ if __name__ == "__main__":
     # update_column(pd, Project)
 
     # print(UserModel.query_user_info(dict(ZTAccount='wjj')).to_dict())
-    # print(query_by_primary_key(8245, ProjectModel).to_dict())
-    print(ProjectModel.query_project(dict(ZTID=124)).to_dict())
+    print(query_by_primary_key(8245, ProjectModel).to_dict())
+    # print(ProjectModel.query_project(dict(ZTID=124)))

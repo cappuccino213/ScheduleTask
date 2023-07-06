@@ -4,13 +4,16 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-import datetime
 import os
 import shutil
 
 import requests
 import xlrd as xlrd
+
+from utility import *
+
 """用于同步excel中记录的技术支持到rdm系统"""
+
 
 class DevelopmentManager:
     def __init__(self, account, password):
@@ -189,6 +192,7 @@ def commit_ts():
             record['OperateUserID'] = ts.field_to_id(record['OperateName'], dm.get_record_users())
             record['Priority'] = ts.field_to_id(record['Priority'], priority_mapping)
             record['Status'] = ts.field_to_id(record['Status'], status_mapping)
+            record['updateTime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # 操作时间
             # 对时间数据进行处理
             if record['RecordTime'] == '':
                 record['RecordTime'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -220,7 +224,7 @@ def backup_excel_after_commit():
 
 # 执行函数
 def technical_support_record():
-    print(f"{6*'='}技术支持记录同步{6*'='}")
+    Toolkit.print_thread_info(f"{6 * '='}技术支持记录同步{6 * '='}")
     print(f"提交记录，结果：\n{commit_ts()}")
     print(f"记录表备份成功，备份结果：\n{backup_excel_after_commit()}")
 

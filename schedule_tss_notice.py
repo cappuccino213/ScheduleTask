@@ -4,9 +4,10 @@
 @Author: 九层风（YePing Zhang）
 @Contact : yeahcheung213@163.com
 """
-import time
 from calendar import monthrange
-from datetime import datetime
+# from datetime import datetime
+
+from utility import *
 
 import requests
 
@@ -20,14 +21,14 @@ class TechnicalSupportStatisticsNotice:
     # 获取当月时间范围
     @staticmethod
     def get_month_range():
-        now = datetime.now().date()
-        month_first_day = datetime(now.year, now.month, 1)
-        month_last_day = datetime(now.year, now.month, monthrange(now.year, now.month)[1])
+        now = datetime.datetime.now().date()
+        month_first_day = datetime.datetime(now.year, now.month, 1)
+        month_last_day = datetime.datetime(now.year, now.month, monthrange(now.year, now.month)[1])
         return month_first_day.strftime("%Y-%m-%d"), month_last_day.strftime("%Y-%m-%d")
 
     # 调用通知接口,本月通知
     def call_tss_notice_api(self):
-        print(f"{6 * '='}技术支持统计通知{6 * '='}")
+        Toolkit.print_thread_info(f"{6 * '='}技术支持统计通知{6 * '='}")
         time_range = TechnicalSupportStatisticsNotice.get_month_range()
         payload = {
             "startDate": time_range[0],

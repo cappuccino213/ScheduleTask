@@ -5,6 +5,9 @@
 @Contact : yeahcheung213@163.com
 """
 import re
+import threading
+import datetime
+
 from bs4 import BeautifulSoup
 
 
@@ -19,6 +22,13 @@ class Toolkit:
         txt_content = bs.get_text(separator='\n')
         # 去空行
         return re.sub('[\n]+', '\n', txt_content)
+
+    # 打印线程信息
+    @staticmethod
+    def print_thread_info(msg):
+        t = threading.currentThread()
+        now_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now_time}] [{t.ident}-{t.name}] {msg}")
 
 
 if __name__ == "__main__":
